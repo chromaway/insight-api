@@ -8,7 +8,8 @@ var async       = require('async');
 var common      = require('./common');
 var util        = require('util');
 
-var Rpc           = require('../../lib/Rpc');
+var imports = require('soop').imports();
+var Rpc     = imports.rpc || require('../../lib/Rpc');
 
 var tDb = require('../../lib/TransactionDb').default();
 var bdb = require('../../lib/BlockDb').default();
@@ -55,12 +56,28 @@ exports.transaction = function(req, res, next, txid) {
  * Show transaction
  */
 exports.show = function(req, res) {
+  tDb.fromIdWithInfo(req.params.txid, function(err, tx) {
+    if (err || ! tx) {
+      return common.handleErrors(err, res);
+    }
 
-  if (req.transaction) {
-    res.jsonp(req.transaction);
-  }
+    res.jsonp(tx.info);
+  });
 };
 
+
+/**
+ * Get raw transaction
+ */
+exports.getRaw = function(req, res) {
+  Rpc.getRawTransaction(req.params.txid, function(err, rawtx) {
+    if (err || !rawtx) {
+      return common.handleErrors(err, res);
+    }
+
+    res.jsonp({txid: req.params.txid, hex: rawtx});
+  });
+}
 
 var getTransaction = function(txid, cb) {
 
