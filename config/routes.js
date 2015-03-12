@@ -12,7 +12,7 @@ module.exports = function(app) {
   //Block routes
   var blocks = require('../app/controllers/blocks');
   app.get(apiPrefix + '/blocks', blocks.list);
-
+  app.get(apiPrefix + '/headers', blocks.rawHeaders);
 
   app.get(apiPrefix + '/block/:blockHash', blocks.show);
   app.param('blockHash', blocks.block);

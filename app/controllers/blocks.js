@@ -28,6 +28,22 @@ exports.block = function(req, res, next, hash) {
   });
 };
 
+/**
+ */
+exports.rawHeaders = function(req, res) {
+  bdb.rawHeaders(req.query.from, req.query.to, 2016, function(err, headers) {
+    if (err) {
+      return common.handleErrors(err, res)
+    }
+
+    res.jsonp({
+      from: req.query.from,
+      to: req.query.to,
+      count: headers.length/160,
+      headers: headers
+    });
+  })
+}
 
 /**
  * Show block
