@@ -30,8 +30,41 @@ exports.block = function(req, res, next, hash) {
 
 /**
  */
-exports.rawHeaders = function(req, res) {
-  bdb.rawHeaders(req.query.from, req.query.to, 2016, function(err, headers) {
+exports.getHeader = function(req, res, next) {
+  var blockId = req.params.blockId;
+
+  function getHeaderByHash(err, hash) {
+    if (err) {
+      return common.handleErrors(err, res, next);
+    }
+
+    bdb.getHeader(hash, function (err, data) {
+      if (err) {
+        return common.handleErrors(err, res, next);
+      }
+
+      res.jsonp(data);
+    })
+  }
+
+  if (blockId === 'latest') {
+    return bdb.getTip(getHeaderByHash);
+  }
+
+  if (blockId.length === 64) {
+    return getHeaderByHash(null, blockId);
+  }
+
+  bdb.blockIndex(blockId, function (err, response) {
+    if (!err) { response = response.blockHash; }
+    getHeaderByHash(err, response);
+  });
+}
+
+/**
+ */
+exports.getRawHeaders = function(req, res) {
+  bdb.getRawHeaders(req.query.from, req.query.to, 2016, function(err, headers) {
     if (err) {
       return common.handleErrors(err, res)
     }

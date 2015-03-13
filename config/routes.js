@@ -12,25 +12,26 @@ module.exports = function(app) {
   // Block routes
   var blocks = require('../app/controllers/blocks');
   // app.get(apiPrefix + '/blocks', blocks.list);
-  app.get(apiPrefix + '/headers', blocks.rawHeaders);
+  app.get(apiPrefix + '/header/:blockId', blocks.getHeader);
+  app.get(apiPrefix + '/headers', blocks.getRawHeaders);
 
-  app.get(apiPrefix + '/block/:blockHash', blocks.show);
-  app.param('blockHash', blocks.block);
+  // app.get(apiPrefix + '/block/:blockHash', blocks.show);
+  // app.param('blockHash', blocks.block);
 
-  app.get(apiPrefix + '/block-index/:height', blocks.blockindex);
-  app.param('height', blocks.blockindex);
+  // app.get(apiPrefix + '/block-index/:height', blocks.blockindex);
+  // app.param('height', blocks.blockindex);
 
   // Transaction routes
   var transactions = require('../app/controllers/transactions');
   // app.get(apiPrefix + '/tx/:txid', transactions.show);
-  app.get(apiPrefix + '/tx/:txid/hex', transactions.getRaw); // get raw tx
+  app.get(apiPrefix + '/tx/:txid', transactions.getRaw); // get raw tx
   // app.get(apiPrefix + '/txs', transactions.list);
   app.post(apiPrefix + '/tx/send', transactions.send);
   // app.param('txid', transactions.transaction); middleware moved to transactions.show
 
   // Address routes
   var addresses = require('../app/controllers/addresses');
-  app.get(apiPrefix + '/addr/:addr', addresses.show);
+  app.get(apiPrefix + '/addr/:addr', addresses.show); // all history
   app.get(apiPrefix + '/addr/:addr/utxo', addresses.utxo);
   // app.get(apiPrefix + '/addrs/:addrs/utxo', addresses.multiutxo);
   // app.post(apiPrefix + '/addrs/utxo', addresses.multiutxo);
