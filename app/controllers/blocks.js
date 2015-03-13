@@ -50,7 +50,7 @@ exports.getHeader = function(req, res, next) {
   }
 
   if (blockId === 'latest') {
-    return bdb.getTip(getHeaderByHash);
+    return bdb.getTip(getHeaderByHash, false);
   }
 
   if (blockId.length === 64) {
