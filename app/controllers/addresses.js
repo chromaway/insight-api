@@ -56,7 +56,7 @@ exports.show = function(req, res, next) {
       } else {
         return res.jsonp(a.getObj());
       }
-    }, {txLimit: req.query.noTxList?0:-1, ignoreCache: req.param('noCache')});
+    }, {txLimit: req.query.noTxList?0:-1, ignoreCache: 1});
   }
 };
 
@@ -71,7 +71,7 @@ exports.utxo = function(req, res, next) {
       else {
         return res.jsonp(a.unspent);
       }
-    }, {onlyUnspent:1, ignoreCache: req.param('noCache')});
+    }, {onlyUnspent:1, ignoreCache: 1});
   }
 };
 
