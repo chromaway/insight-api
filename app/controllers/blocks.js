@@ -35,11 +35,13 @@ exports.getHeader = function(req, res, next) {
 
   function getHeaderByHash(err, hash) {
     if (err) {
+      if (err.code === -1) { err = null; } // send 404 for wrong height
       return common.handleErrors(err, res, next);
     }
 
     bdb.getHeader(hash, function (err, data) {
       if (err) {
+        if (err.notFound) { err = null; } // send 404 for wrong blockhash
         return common.handleErrors(err, res, next);
       }
 
@@ -66,6 +68,7 @@ exports.getHeader = function(req, res, next) {
 exports.getRawHeaders = function(req, res) {
   bdb.getRawHeaders(req.query.from, req.query.to, 2016, function(err, headers) {
     if (err) {
+      if (err.notFound) { err = null; }
       return common.handleErrors(err, res)
     }
 
