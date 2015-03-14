@@ -24,7 +24,8 @@ module.exports = function(app) {
   // Transaction routes
   var transactions = require('../app/controllers/transactions');
   // app.get(apiPrefix + '/tx/:txid', transactions.show);
-  app.get(apiPrefix + '/tx/:txid', transactions.getRaw); // get raw tx
+  app.get(apiPrefix + '/tx/:txid/hex', transactions.getRaw);
+  app.get(apiPrefix + '/tx/:txid/merkle', transactions.getMerkle);
   // app.get(apiPrefix + '/txs', transactions.list);
   app.post(apiPrefix + '/tx/send', transactions.send);
   // app.param('txid', transactions.transaction); middleware moved to transactions.show

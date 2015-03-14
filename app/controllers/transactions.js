@@ -3,6 +3,8 @@
 /**
  * Module dependencies.
  */
+var crypto      = require('crypto');
+var bufferEqual = require('buffer-equal');
 var Address     = require('../models/Address');
 var async       = require('async');
 var common      = require('./common');
@@ -77,6 +79,65 @@ exports.getRaw = function(req, res) {
 
     res.jsonp({txid: req.params.txid, hex: rawtx});
   });
+}
+
+function decode(s) {
+  return Array.prototype.reverse.call(new Buffer(s, 'hex'))
+}
+
+function encode(s) {
+  return Array.prototype.reverse.call(new Buffer(s)).toString('hex')
+}
+
+exports.getMerkle = function(req, res) {
+  var txid = req.params.txid
+  Rpc.getTxInfo(txid, function(err, txInfo) {
+    if (err || !txInfo) {
+      return common.handleErrors(err, res);
+    }
+
+    if (typeof txInfo.blockhash === 'undefined') {
+      return res.jsonp({status: 'unconfirmed', data: null})
+    }
+
+    bdb.fromHashWithInfo(txInfo.blockhash, function (err, block) {
+      if (err) { return common.handleErrors(err, res); }
+
+      var merkle = [];
+      var targetHash = decode(txid)
+      var txs = block.info.tx.map(decode);
+      while (txs.length !== 1) {
+        if (txs.length % 2 === 1) { txs.push(txs[txs.length-1]); }
+
+        var newTxs = [];
+        for (var i = 0; i < txs.length; i += 2) {
+          var newHash = Buffer.concat([txs[i], txs[i+1]]);
+          newHash = crypto.createHash('sha256').update(newHash).digest();
+          newHash = crypto.createHash('sha256').update(newHash).digest();
+          newTxs.push(newHash);
+
+          if (bufferEqual(txs[i], targetHash)) {
+            merkle.push(encode(txs[i + 1]));
+            targetHash = newHash;
+          } else if (bufferEqual(txs[i+1], targetHash)) {
+            merkle.push(encode(txs[i]));
+            targetHash = newHash;
+          }
+        }
+        txs = newTxs;
+      }
+
+      return res.jsonp({
+        status: block.info.isMainChain ? 'confirmed' : 'invalid',
+        data: {
+          blockHeight: block.info.height,
+          blockHash: block.hash,
+          index: block.info.tx.indexOf(txid),
+          merkle: merkle
+        }
+      });
+    })
+  })
 }
 
 var getTransaction = function(txid, cb) {
