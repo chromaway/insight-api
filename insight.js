@@ -61,6 +61,7 @@ program.parse(process.argv);
 
 // create express app
 var expressApp = express();
+expressApp.disable('etag');
 
 // setup headers
 require('./config/headers')(expressApp);
