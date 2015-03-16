@@ -102,6 +102,9 @@ exports.getMerkle = function(req, res) {
 
     bdb.fromHashWithInfo(txInfo.blockhash, function (err, block) {
       if (err) { return common.handleErrors(err, res); }
+      if (!block.info.isMainChain) {
+        return res.jsonp({status: 'invalid', data: null});
+      }
 
       var merkle = [];
       var targetHash = decode(txid)
@@ -128,7 +131,7 @@ exports.getMerkle = function(req, res) {
       }
 
       return res.jsonp({
-        status: block.info.isMainChain ? 'confirmed' : 'invalid',
+        status: 'confirmed',
         data: {
           blockHeight: block.info.height,
           blockHash: block.hash,
